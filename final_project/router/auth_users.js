@@ -41,19 +41,18 @@ app.use(express.json());
 //only registered users can login
 regd_users.post("/login", (req,res) => {
     const { username, password } = req.body;
-
     if (!username || !password) {
         return res.status(400).json({ message: "Username and password are required." });
     }
 
     if (authenticatedUser(username, password)) {
         // Create JWT token
-        const token = jwt.sign({ username }, 'access', { expiresIn: '1h' });
+        const accessToken = jwt.sign({ username }, 'access', { expiresIn: '1h' });
 
         // Save in session
-        req.session.authorization = { token, username };
+        req.session.authorization = { accessToken };
 
-        return res.status(200).json({ message: "Login successful", token });
+        return res.status(200).json({ message: "Login successful"});
     } else {
         return res.status(401).json({ message: "Invalid login. Check username and password." });
     }
@@ -82,7 +81,9 @@ regd_users.put("/auth/review/:isbn", (req, res) => {
 });
 
 // deleting a book review under 
-regd_users.delete("/auth/review/:isbn", (req, res) => {});
+regd_users.delete("/auth/review/:isbn", (req, res) => {
+    
+});
 
 module.exports.authenticated = regd_users;
 module.exports.isValid = isValid;
