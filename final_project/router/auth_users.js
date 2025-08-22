@@ -6,37 +6,15 @@ const session = require('express-session');
 
 let users = [];
 
+// Filter the users array for any user with the same username
 const isValid = (username)=>{ //returns boolean
     return users.every(user => user.username !== username);
-    // Filter the users array for any user with the same username
-    let userswithsamename = users.filter((user) => {
-        return user.username === username;
-    });
-    
-    if (userswithsamename.length > 0) {
-        return false;
-    } else {
-        return true;
-    }
 }
 
+// Filter the users array for any user with the same username and password
 const authenticatedUser = (username,password)=>{ //returns boolean
-    return users.some(user => user.username === username && user.password === password);
-    // Filter the users array for any user with the same username and password
-    let validusers = users.filter((user) => {
-        return (user.username === username && user.password === password);
-    });
-    // Return true if any valid user is found, otherwise false
-    if (validusers.length > 0) {
-        return true;
-    } else {
-        return false;
-    }
+    return users.some(user => user.username === username && user.password === password);   
 }
-
-const app = express();
-app.use(session({secret:"fingerpint"},resave=true,saveUninitialized=true));
-app.use(express.json());
 
 //only registered users can login
 regd_users.post("/login", (req,res) => {
