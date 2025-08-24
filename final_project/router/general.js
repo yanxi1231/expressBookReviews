@@ -5,6 +5,8 @@ let users = require("./auth_users.js").users;
 const public_users = express.Router();
 
 
+
+
 public_users.post("/register", (req,res) => {
     const { username, password } = req.body;
 
@@ -28,15 +30,33 @@ public_users.post("/register", (req,res) => {
 
 // Get the book list available in the shop
 public_users.get('/',function (req, res) {
-    return res.status(200).json(books);
-    return res.status(300).json(JSON.stringify(books,null,4));
+    myPromise.then(() => {return res.status(200).json(books)})
+});
+
+//Creating a promise method. The promise will get resolved when timer times out after 6 seconds.
+let myPromise = new Promise((resolve,reject) => {
+    setTimeout(() => {
+      resolve("Promise resolved")
+    },6000)})
+
+public_users.get('/', function (req, res) {
+    myPromise.then(() => {
+        return res.status(200).json(books);
+    }).catch((error) => {
+        return res.status(500).json({ message: "Error fetching books", error });
+    });
 });
 
 // Get book details based on ISBN
 public_users.get('/isbn/:isbn',function (req, res) {
     const isbn = req.params.isbn;
     if (books[isbn]) {
-        return res.status(200).json(books[isbn]);
+        myPromise.then(() => {
+            return res.status(200).json(books[isbn]);
+        }).catch((error) => {
+            return res.status(500).json({ message: "Error fetching books", error });
+        });
+        
     } else {
         return res.status(404).json({ message: "Book not found for this ISBN." });
     }
@@ -49,7 +69,6 @@ public_users.get('/author/:author', function (req, res) {
 
     // Get all keys from the books object
     const bookKeys = Object.keys(books);
-
     // Loop through each book and check if the author matches
     for (let key of bookKeys) {
         const book = books[key];
@@ -57,9 +76,13 @@ public_users.get('/author/:author', function (req, res) {
             matchingBooks.push({ isbn: key, ...book });
         }
     }
-
+    
     if (matchingBooks.length > 0) {
-        return res.status(200).json(matchingBooks);
+        myPromise.then(() => {
+            return res.status(200).json(matchingBooks);
+        }).catch((error) => {
+            return res.status(500).json({ message: "Error fetching books", error });
+        });
     } else {
         return res.status(404).json({ message: "No books found by this author." });
     }
@@ -78,7 +101,11 @@ public_users.get('/title/:title', function (req, res) {
     }
 
     if (matchingBooks.length > 0) {
-        return res.status(200).json(matchingBooks);
+        myPromise.then(() => {
+            return res.status(200).json(matchingBooks);
+        }).catch((error) => {
+            return res.status(500).json({ message: "Error fetching books", error });
+        });
     } else {
         return res.status(404).json({ message: "No books found matching this title." });
     }
